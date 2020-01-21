@@ -1,0 +1,1 @@
+start cmd cd C:\Users\Daniel\Desktop\Shizu bot /k python shizu.py

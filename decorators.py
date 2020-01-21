@@ -1,11 +1,12 @@
 from functools import wraps
 import bot_vars
+import asyncio
 
 
 def commands(prefix=None, additional_prefix=None):
     def decor(func):
         func_name = func.__name__
-        print(func_name)
+        print("Fun NAME: " + func_name)
         command_prefix = bot_vars.COMMAND_PREFIX  # prefix del bot. Por defecto -> ;
         command_name_list = [command_prefix + (prefix or func_name), command_prefix + (additional_prefix or func_name)]
 
@@ -15,6 +16,8 @@ def commands(prefix=None, additional_prefix=None):
                 Haciendo test esta es la forma mas rapida de matchear que encontre. re.compile/match y
                 startswith demoran mucho mas que esto.
             """
+            if (message.content == "None"):
+                await func(self, message)
 
             current_command = message.content.split(maxsplit=1)[0]
 
@@ -33,3 +36,15 @@ def commands(prefix=None, additional_prefix=None):
 
         return wrapper
     return decor
+
+def decotest(metodo):
+    def decor2(func):
+        print("deccorrr!")
+    
+        @wraps(func)
+        async def wrapper2(self, message):
+            print("wrapper!!")
+            await metodo(self, message)
+            await func(self, message)
+        return wrapper2
+    return decor2
