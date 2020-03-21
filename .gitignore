@@ -1,6 +1,14 @@
 .gitignore
+.vscode
 __pycache__
 bot_vars.py
 test.py
 guilds
 music
+images
+asd
+youtube
+*.bat
+database_field_updater.py
+rernombrar_archivos.py
+*.txt

@@ -3,71 +3,104 @@ from datetime import datetime
 import inspect
 from threading import Timer
 import bot_vars
-import Debug
+from core import debug_log
+from shizu_database import ShizuDatabase
 
 class ShizuTasks():
 
     tasks = []
 
-
     def __init__(self):
-        pass
+        self.shizu_database = ShizuDatabase()
+        print("Fui instanciada!!!!!!!!!!!!!!!!!! eeeeewawawawawaa!!!")
 
-    def create_task2(self, loop_minutes, message, function, *args):
-        tasks_d = {
-            "task_name": inspect.stack()[1].funcion, # como nombre le coloco el nombre de la funcion que llamo al metodo createtask
-            "user_task": message.author.id,
-            "guild_id": message.guild.id,
-            "channel_id": message.channel.id,
-            "loop_minutes": loop_minutes,
-            "task_created_time": datetime.now(), #datetime.now()
-            "method": [function, *args] # function, *args
-        }
-        self.tasks.append(tasks_d)
-
-    def create_task(self, loop_minutes, function, *args):
-        task_created_time = datetime.now()
+    def create_task(self, task_id, command, minutes_until_execute, loop_times, function, *args):
         # el tiempo en que se creo la task debe re setearse cada vez que se ejecuta la task
-        print("Task creada!")
-        self.tasks.append([[function, *args], loop_minutes, task_created_time])
+        task_dic = {
+            "_id" : task_id,
+            "minutes_until_execute" : minutes_until_execute,
+            "loop_times" : loop_times,
+            "created_time" : datetime.now(),
+            "function" : [function, *args],
+            "command" : command
+            }
+        self.tasks.append(task_dic)
+
+    async def remove_task(self, task_id):
+        index = -1
+        for task in self.tasks:
+            if task["_id"] == task_id:
+                index = self.tasks.index(task)
+                break
+
+        if index != -1:
+            del self.tasks[index]
+            return True
+        return False
+
+    def start_task(self, task):
+        self.tasks.append(task)
+
 
     async def check_tasks(self):
-        for task in self.tasks:
-            loop_minutes = task[1]
-            task_created_time = task[2]
-            actual_minutes = datetime.now().hour * 60 + datetime.now().minute # tiempo, en minutos, que transcurrio en el dia al momento de ejecutar esto
-            execution_deadline = loop_minutes + task_created_time.minute + task_created_time.hour * 60 # tiempo, en minutos, en que debe ejecutarse la funcion
+        # Verifica tasks en base de datos que deben ser ejecutadas y la ejecuta
+        print(self.tasks)
+        for task_dic in self.tasks:
+            task_id = task_dic["_id"]
+            minutes_until_execute = task_dic["minutes_until_execute"]
+            loop_times = task_dic["loop_times"]
+            created_time = task_dic["created_time"]
+            actual_time = datetime.now()
+            seconds_left = (created_time - actual_time).total_seconds() + (minutes_until_execute * 60) # segundos restante para la ejecucion
+            message = task_dic["function"][1]
 
-            # si el dia en que se creo la task NO es hoy, continuo a la siguiente tarea
-            if task_created_time.day != datetime.now().day:
-                if bot_vars.DEBUG:
-                    Debug.log("Task no se ejecuto porque distinto dia. Hora task creada: {1}. Hora de ejecucion de la task: {0}: ".format(task_created_time, execution_deadline))
-                continue
-            else: # es hoy, verifico los minutos
-
-                # Si el tiempo que paso en el dia hasta ahora supera al tiempo en que debe ejecutarse la funcion, pues la ejecuto
-                if actual_minutes >= execution_deadline:
-                        
-                    # Verifico si es asyncrona la funcion y la ejecuto, sino tambien pero sin await
-                    if (inspect.iscoroutinefunction(task[0][0])):
-                        await self.run_task_async(task[0][0], task[0][1]) # task[0][0], task[0][1] ===> function, *args
-                    else:
-                        print("no es asyncrona, ejecutando no asayncrona")
-                        self.run_task(task[0])
-
-                    # actualizo el proximo tiempo de la tarea
-                    task[2] = datetime.now()
+            if seconds_left <= 0:
+                # Hora de ejecutar la funcion.
+                # Verifico si es asyncrona la funcion y la ejecuto, sino tambien pero sin await
+                if (inspect.iscoroutinefunction(task_dic["function"][0])):
+                    message.content = task_dic["command"]
+                    print(f"Por ejecutar, message.content es: {message.content}")
+                    await self.run_task_async(task_dic["function"][0], message)
                 else:
-                    if bot_vars.DEBUG:
-                        Debug.log("Task no se ejecuto porque falta tiempo. Hora task creada: {1}. Hora de ejecucion de la task: {0}: ".format(task_created_time, execution_deadline))
+                    print("no es asyncrona, ejecutando sincrona")
+                    self.run_task(task_dic["function"][0], task_dic["function"][1])
+
+                if loop_times > 0:
+                    loop_times -= 1
+                    # Actualizo el looptimes en tasks porque sino problemas.
+                    self.tasks[self.tasks.index(task_dic)]["loop_times"] = loop_times
+                    if loop_times == 0:
+                        # Finalizo la task
+                        result = self.shizu_database.remove("tasks", {"_id" : task_id})
+                        del self.tasks[self.tasks.index(task_dic)]
+                        if not result:
+                            return print("Error: No se pudo eliminar la tarea de la base de datos.")
+                        else:
+                            return debug_log("Una task acaba de ser eliminada de la base de datos y de la lista de tasks.", "task")
+
+                # actualizo el proximo tiempo de la tarea
+                task_dic["created_time"] = actual_time
+                update_task_dic = {
+                    "_id" : task_id,
+                    "minutes_until_execute" : minutes_until_execute,
+                    "loop_times" : loop_times,
+                    "created_time" : actual_time
+                }
+
+                # Actualizo la task en la base de datos con el nuevo loop_times y el created_time
+                modified = self.shizu_database.update_task(update_task_dic)
+                if modified:
+                    debug_log("[CheckTask] task actualizada exitosamente")
+                else:
+                    print("ERROR: Se intento actualizar una task en [check_tasks] pero modified es False.")
+            else:
+                debug_log(f"Task no se ejecuto porque falta tiempo. Hora task creada: {created_time}. Se ejecutara en esa hora mas {minutes_until_execute} minutos.", "tasks")
 
 
     async def run_task_async(self, task, *args):
-        if bot_vars.DEBUG:
-            Debug.log("Ejecutando una task asincrona! ...")        
+        debug_log("Ejecutando una task asincrona! ...", "tasks")        
         await task(*args)
 
     def run_task(self, task, *args):
-        if bot_vars.DEBUG:
-            Debug.log("Ejecutando una task sincrona! ...")
+        debug_log("Ejecutando una task sincrona! ...", "tasks")
         task(*args)

@@ -1,9 +1,11 @@
 from functools import wraps
 import bot_vars
 import asyncio
+import inspect
 
 
 def commands(prefix=None, additional_prefix=None):
+
     def decor(func):
         func_name = func.__name__
         print("Fun NAME: " + func_name)
@@ -36,15 +38,14 @@ def commands(prefix=None, additional_prefix=None):
 
         return wrapper
     return decor
+"""
+def ignorecalls(func):
+    # Decorador que solo aceptara calls de funciones de la misma clase o de la clase especificada como excepcion
 
-def decotest(metodo):
-    def decor2(func):
-        print("deccorrr!")
-    
-        @wraps(func)
-        async def wrapper2(self, message):
-            print("wrapper!!")
-            await metodo(self, message)
-            await func(self, message)
-        return wrapper2
-    return decor2
+    def inner(exception=None, *args):
+        if __name__ == "__main__":
+            # Es decir, si 
+            pass
+
+"""
+

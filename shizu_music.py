@@ -50,6 +50,15 @@ class YTDLSource(discord.PCMVolumeTransformer):
         filename = data['url'] if stream else ytdl.prepare_filename(data)
         return cls(discord.FFmpegPCMAudio(filename, **ffmpeg_options), data=data)
 
+
+        if 'entries' in data:
+            # take first item from a playlist
+            data = data['entries'][0]
+
+        filename = ytdl.prepare_filename(data)
+        print(filename)
+        return filename
+
     @classmethod
     async def get_youtube_url(cls, url):
         loop = asyncio.get_event_loop()
@@ -63,7 +72,6 @@ class YTDLSource(discord.PCMVolumeTransformer):
 
 
 class ShizuMusic():
-
 
     def __init__(self, shizu):
         self.shizu = shizu
@@ -115,6 +123,8 @@ class ShizuMusic():
         await message.channel.send(youtube_url)
 
 
+
+
     @commands('stream')
     async def stream(self, message):
         """Streams from a url (same as yt, but doesn't predownload)"""
@@ -152,7 +162,7 @@ class ShizuMusic():
         self.voice_client = None
         await self.voice_client.disconnect()
 
-    @commands('stop')
+    @commands()
     async def stop(self, message):
         await self.ensure_voice(message)
         self.voice_client.stop()
@@ -161,7 +171,7 @@ class ShizuMusic():
     #@play.before_invoke
     #@yt.before_invoke
     #@stream.before_invoke
-    @commands("None")
+    @commands()
     async def ensure_voice(self, message):
         if self.voice_client is None:
             print("ES NONE")
