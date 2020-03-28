@@ -4,11 +4,11 @@ __pycache__
 bot_vars.py
 test.py
 guilds
-music
 images
+music/*
 asd
 youtube
 *.bat
 database_field_updater.py
-rernombrar_archivos.py
+renombrar_archivos.py
 *.txt

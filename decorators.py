@@ -18,6 +18,7 @@ def commands(prefix=None, additional_prefix=None):
                 Haciendo test esta es la forma mas rapida de matchear que encontre. re.compile/match y
                 startswith demoran mucho mas que esto.
             """
+                
             if (message.content == "None"):
                 await func(self, message)
 

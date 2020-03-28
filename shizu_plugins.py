@@ -11,13 +11,13 @@ class ShizuPlugin:
     """
         This class is a container of classes that have commands for the bot.
         Every class added in the plugin list should import decorators and add
-        the @commands(prefix="name") tag to make the commands work property
+        the @commands(prefix="name") tag to make the commands work correctly
     """
-
+    
     plugin_list = []
 
     def __init__(self, shizu):
-        self.plugin_list = [ShizuCommands(), ShizuMusic(shizu), ShizuAdmin(), ShizuMedia(), ShizuYoutube(shizu), ShizuImages(), ShizuCoronaVirus(shizu)]
+        self.plugin_list = [ShizuCommands(shizu), ShizuMusic(shizu), ShizuAdmin(), ShizuMedia(shizu), ShizuYoutube(shizu), ShizuImages(), ShizuCoronaVirus(shizu)]
 
     def add_plugin(self, obj):
         if inspect.isclass(obj):

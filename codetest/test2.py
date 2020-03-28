@@ -1,8 +1,7 @@
-from decorator_test import check
 
 
-@check
-def test():
-    print("EN TEST")
+diction = {"bla" : [{"nombre" : "perros", "valor": 5}, {"nombre": "patos"}]}
 
-test()
+valor = diction["bla"][0]["valor"] - 1
+print(diction["bla"][0]["valor"] )
+

@@ -2,10 +2,26 @@ import asyncio
 import discord
 import youtube_dl
 from decorators import commands
+from functools import wraps
 
 # Suppress noise about console usage from errors
 youtube_dl.utils.bug_reports_message = lambda: ''
 
+def ignorecalls():
+
+    def decor(func):
+
+        @wraps(func)
+        async def wrapper(self, message):
+            if __name__ == "__main__":
+                print("YEP")
+                await func(self, message)
+            else:
+                print("call ignorada")
+                return False
+
+        return wrapper
+    return decor
 
 ytdl_format_options = {
     'format': 'bestaudio/best',
@@ -78,7 +94,7 @@ class ShizuMusic():
         self.voice_client = None
 
     @commands('j')
-    async def join(self, message):
+    async def join2(self, message):
         """Joins a voice channel"""
         if message.author.voice == None:
             return await message.channel.send("No estas conectado a un canal de voz!! (😡)")
@@ -93,6 +109,11 @@ class ShizuMusic():
         self.voice_client = await voice_channel.connect()
 
     @commands()
+    async def test2(self, message):
+        print("ASD")
+
+
+    @commands()
     async def playlocal(self, message):
         """Plays a file from the local filesystem"""
         await self.ensure_voice(message)
@@ -104,7 +125,7 @@ class ShizuMusic():
         await message.channel.send('Reproduciendo: {}'.format(query))
 
     @commands('p')
-    async def play(self, message):
+    async def play2(self, message):
         """Plays from a url (almost anything youtube_dl supports)"""
         await self.ensure_voice(message)
 
@@ -118,12 +139,11 @@ class ShizuMusic():
 
     @commands('yt')
     async def youtube(self, message):
+        await self.ensure_voice(message)
+
         url = message.content
         youtube_url = await YTDLSource.get_youtube_url(url)
         await message.channel.send(youtube_url)
-
-
-
 
     @commands('stream')
     async def stream(self, message):
@@ -167,22 +187,15 @@ class ShizuMusic():
         await self.ensure_voice(message)
         self.voice_client.stop()
 
-
-    #@play.before_invoke
-    #@yt.before_invoke
-    #@stream.before_invoke
-    @commands()
+    @ignorecalls()
     async def ensure_voice(self, message):
         if self.voice_client is None:
             print("ES NONE")
             if message.author.voice:
-                print("aaaa")
                 await message.author.voice.channel.connect()
                 self.voice_client = message.author.voice
             else:
-                print("bbbb")
                 await message.channel.send("No estas conectado a un canal de voz!! (😡)")
                 return
         elif self.voice_client.is_playing():
-            print("NO ES NONE")
             self.voice_client.stop()

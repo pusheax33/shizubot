@@ -7,3 +7,4 @@ def check(func):
     else:
         print("NOP")
         return func
+

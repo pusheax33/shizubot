@@ -1,24 +1,23 @@
 ﻿from decorators import commands
-import os
 import random
 from image_download import googleimagesdownload
-from core import debug_log, GetSavedEmojis
+from core import GetSavedEmojis
 from shizu_tasks import *
 from shizu_database import ShizuDatabase
-from discord import File, Embed
-import pickle
+from discord import File
 import requests
 
 ip = requests.get('https://checkip.amazonaws.com').text.strip()
 
-class ShizuCommands():
+
+class ShizuCommands:
     
-    def __init__(self):
+    def __init__(self, shizu):
         self.image_downloader = googleimagesdownload()
-        self.shizu_tasks = ShizuTasks()
+        self.shizu = shizu
+        self.shizu_tasks = shizu.shizu_tasks
         self.database = ShizuDatabase()
         self.instance = self
-
 
     @commands(prefix="ayuda")
     async def help(self, message):
@@ -62,7 +61,7 @@ class ShizuCommands():
                      }
 
         choice = random.choice(image_time)
-        if choice != None:
+        if choice is not None:
             arguments["time"] = choice
 
         debug_log(arguments)
@@ -73,7 +72,6 @@ class ShizuCommands():
             await message.channel.send(image_url)
         except:
             await message.channel.send("No pude encontrar nada >.<")
-
 
     @commands()
     async def emoji(self, message):
@@ -94,39 +92,21 @@ class ShizuCommands():
         if len(splitted) > 1:
             loop_times = int(splitted[1])
         
-        # guardo la task en la base de datos, previamente serializando la funcion sino no funca
-        message.content = ";emoji " + message.content
-        command_name = message.content.split(' ')[0]
-
-        # Para el caso donde el user llame al comando y ya exista en la db la task verifico primero si esta en la db
-        # teniendo en cuenta que debe haber un solo comando igual por cnal
-        doc = {
-            "channel_id" : message.channel.id,
-            "command" : message.content
-        }
-        task_exists = self.database.query("tasks", doc) != None
-        print(f"taskexists {task_exists}")
-
-        if task_exists:
-            # Elimino la task previa y agrego una nueva
-            removed = self.database.remove("tasks", doc)
-            print(f"La tarea fue removida???? {removed.deleted_count}")
-            debug_log(f"Una tarea fue eliminada para volver a crear la misma tarea pero actualizada", "shizucommands")
-            if not removed: # ???????
-                raise Exception
-
-        # Si no existe la task creo una nueva
-        new_task_id = self.database.save_task(message, minutes_until_execute, loop_times)
-
-        if not new_task_id: # ???????????
-            raise Exception
+        message.content = ";emoji"
+        # Obtengo o creo el documento de la DB
+        task_doc = self.shizu.shizu_document.create_task_document("emoji", "time_task", message, minutes_until_execute, loop_times)
+        # Actualizo o guardo por primera vez el documento en la DB
+        database_task_id = self.shizu.database.save_task(task_doc)
+        if not database_task_id:
+            await message.channel.send("Hubo un error al guardar la tarea en la base de datos, abortando.")
+            return print("TAIHEN!!, ERROR AL GUARDAR LA TASK EN LA BASE DE DATOS!!")
 
         # creo la task para que comience a ejecutarse
-        self.shizu_tasks.create_task(new_task_id, message.content, minutes_until_execute, loop_times, self.emoji, message)
-        debug_log("Task creada exitosamente", "shizucommands")
-        if not task_exists:
-            reply = f"Ok, cada {minutes_until_execute} minutos colocare un emoji" + (f" con un total de {loop_times} veces." if loop_times else ".")
-            await message.channel.send(reply)
+        self.shizu.shizu_tasks.start_task(task_doc)
+
+        discord_reply = f"Ok, cada {minutes_until_execute} minutos posteare un emoji"
+        discord_reply += "." if loop_times == 0 else f" con un total de {loop_times} veces."
+        await message.channel.send(discord_reply)
             
     @commands()
     async def web(self, message):
@@ -138,16 +118,16 @@ class ShizuCommands():
         doc = {
             "_id" : author.id
         }
-        current_exp = round(self.database.query("members", doc, "experience"))
-        level = self.database.query("members", doc, "level")
+        current_exp = round(self.database.get_document("members", doc)["experience"])
+        level = self.database.get_document("members", doc)["level"]
         current_lvl_exp = round(self.database.get_lvl_experience(level))
         next_lvl_exp = round(self.database.get_lvl_experience(level + 1))
         lvl_exp = abs(next_lvl_exp - current_lvl_exp) # exp total para el siguiente nivel, ej: 40000
 
-        actual_lvl_exp = abs( (current_exp - current_lvl_exp) + lvl_exp) # experiencia obtenida en el nivel actual, ej: lvl 15 con 12321/40000 de exp para nivel 16
+        # experiencia obtenida en el nivel actual, ej: lvl 15 con 12321/40000 de exp para nivel 16
+        actual_lvl_exp = abs( (current_exp - current_lvl_exp) + lvl_exp)
 
         await message.channel.send(f"Level {level}. Experiencia {actual_lvl_exp}/{lvl_exp}.")
-
 
     @commands()
     async def perfil(self, message):
@@ -159,9 +139,8 @@ class ShizuCommands():
 
     @commands()
     async def shizy(self, message):
-        shizy = self.database.query("members", message.author.id, "shizy")
+        shizy = self.database.get_document("members", message.author.id)["shizy"]
         await message.channel.send("Tenes un total de %d Shizys. ;shop para gastarlos" % shizy)
-
 
     @commands()
     async def stoptask(self, message):
@@ -170,7 +149,6 @@ class ShizuCommands():
     @commands()
     async def birthday(self, message):
         await message.channel.send("Nací en 2016-04-25 21:39:58 -0300")
-
 
     @commands()
     async def gif(self, message):
@@ -193,7 +171,7 @@ class ShizuCommands():
                      }
 
         choice = random.choice(image_time)
-        if choice != None:
+        if choice is not None:
             arguments["time"] = choice
 
         debug_log(arguments)
@@ -205,7 +183,6 @@ class ShizuCommands():
         except:
             await message.channel.send("No pude encontrar nada >.<")
 
-    
     @commands()
     async def choose(self, message):
         words = message.content.split(',')
@@ -213,3 +190,8 @@ class ShizuCommands():
             await message.channel.send(random.choice(words))
         else:
             await message.channel.send("Formato invalido ._. ==> escribe: ;choose opcion1, opcion2, etc")
+
+    @commands()
+    async def remind(self, message):
+        # Formato del comando: ;remind 1 day/month/year text here(si debe recordar en canal actual)
+        command = message.content
