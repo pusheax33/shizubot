@@ -1,6 +1,6 @@
 ﻿from decorators import commands
 import random
-from image_download import googleimagesdownload
+from google_images_download.google_images_download import googleimagesdownload
 from core import GetSavedEmojis
 from shizu_tasks import *
 from shizu_database import ShizuDatabase
@@ -37,41 +37,6 @@ class ShizuCommands:
     async def ii(self, message):
         msg = message.content.replace('a', 'i').replace('e', 'i').replace('o', 'i').replace('u', 'i')
         await message.channel.send(msg)
-
-    @commands()
-    async def img(self, message):
-        image_to_search = message.content
-
-        image_position = random.randrange(0, 8)
-        image_time = [None, "past-24-hours", "past-year", None, "past-7-days",
-                      None, "past-7-days", None, "past-month", "past-month",
-                      "past-month", None, "past-year", None, "past-year", "past-year"
-                      ]
-
-        image_type = ["png", "jpg"]
-
-        arguments = {
-                     "keywords": image_to_search,
-                     "no_download": True,
-                     "silent_mode": True,
-                     "limit": image_position,
-                     "safe_search": False,
-                     "format": random.choice(image_type),
-                     "offset": image_position
-                     }
-
-        choice = random.choice(image_time)
-        if choice is not None:
-            arguments["time"] = choice
-
-        debug_log(arguments)
-
-        paths = self.image_downloader.download(arguments)
-        try:
-            image_url = paths[0][image_to_search][0]
-            await message.channel.send(image_url)
-        except:
-            await message.channel.send("No pude encontrar nada >.<")
 
     @commands()
     async def emoji(self, message):
@@ -149,39 +114,6 @@ class ShizuCommands:
     @commands()
     async def birthday(self, message):
         await message.channel.send("Nací en 2016-04-25 21:39:58 -0300")
-
-    @commands()
-    async def gif(self, message):
-        image_to_search = message.content
-
-        image_position = random.randrange(0, 8)
-        image_time = [None, "past-24-hours", "past-year", None, "past-7-days",
-                      None, "past-7-days", None, "past-month", "past-month",
-                      "past-month", None, "past-year", None, "past-year", "past-year"
-                      ]
-
-        arguments = {
-                     "keywords": image_to_search,
-                     "no_download": True,
-                     "silent_mode": True,
-                     "limit": image_position,
-                     "safe_search": False,
-                     "format": "gif",
-                     "offset": image_position
-                     }
-
-        choice = random.choice(image_time)
-        if choice is not None:
-            arguments["time"] = choice
-
-        debug_log(arguments)
-
-        paths = self.image_downloader.download(arguments)
-        try:
-            image_url = paths[0][image_to_search][0]
-            await message.channel.send(image_url)
-        except:
-            await message.channel.send("No pude encontrar nada >.<")
 
     @commands()
     async def choose(self, message):

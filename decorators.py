@@ -13,7 +13,7 @@ def commands(prefix=None, additional_prefix=None):
         command_name_list = [command_prefix + (prefix or func_name), command_prefix + (additional_prefix or func_name)]
 
         @wraps(func)
-        async def wrapper(self, message):
+        async def wrapper(self, message, *args):
             """
                 Haciendo test esta es la forma mas rapida de matchear que encontre. re.compile/match y
                 startswith demoran mucho mas que esto.
@@ -35,7 +35,7 @@ def commands(prefix=None, additional_prefix=None):
             message.content = message.content.replace(current_command, '').strip()
 
             # Si matcheo y t0do va bien procedo a ejecutar la funcion del comando
-            await func(self, message)
+            await func(self, message, *args)
 
         return wrapper
     return decor

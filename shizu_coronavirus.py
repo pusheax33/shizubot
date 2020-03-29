@@ -7,24 +7,25 @@ from datetime import datetime
 from shizu_document import ShizuDocument
 import traceback
 
+
 class CoronaVirusData:
     # Clase creada solo para los metodos estaticos. En realidad deberia re hacer el decorators para evitar esto que no es lo ideal.
     previous_datalist = {}
 
-
-
     def cvidupdate(self):
-        resp = requests.get("https://docs.google.com/spreadsheets/d/e/2PACX-1vQuDj0R6K85sdtI8I-Tc7RCx8CnIxKUQue0TCUdrFOKDw9G3JRtGhl64laDd3apApEvIJTdPFJ9fEUL/pubhtml?gid=0&single=true")
-        #print(resp.text)
+        try:
+            resp = requests.get("https://docs.google.com/spreadsheets/d/e/2PACX-1vQuDj0R6K85sdtI8I-Tc7RCx8CnIxKUQue0TCUdrFOKDw9G3JRtGhl64laDd3apApEvIJTdPFJ9fEUL/pubhtml?gid=0&single=true")
+        except Exception:
+            return
+        # print(resp.text)
         regx_country = r'class=\"s0\">\d{0,10}((?:</td><td class=\"s0\">)|(?:</td><td class=\"s0 softmerge\"><div class=\"softmerge-inner\" style=\"width: 97px; left: -1px;\">))(.*?)(?:(?:</div>)|(?:</td><td class=\"s1\"))'
         regx_data = r'class=\"s1\">([\d]*)</td>'
         matches = re.finditer(regx_data, resp.text, re.MULTILINE)
         matches_country = re.finditer(regx_country, resp.text, re.MULTILINE)
-        actual_datalist = {}
 
+        actual_datalist = {}
         country_list = []
 
-        
         # Obtengo paises
         for matchNum2, match in enumerate(matches_country, start=1):
             country_list.append(match.group(2))
@@ -40,10 +41,9 @@ class CoronaVirusData:
                 data_temp_list = []
                 counter +=1
 
-
         # Listo, en data_list esta toda la data de los casos, muertes y recuperados con el sig formato:
         # [ [pais1, casos, muertes, recuperaciones], [pais2, casos, muertes, recuperados], etc ]...
-        #print(datalist)
+        # print(datalist)
 
         if len(self.previous_datalist) == 0:
             # Si recien enciendo el bot la previous datalist va a estar vacia, no necesito hacer lo de abajo porque fallara.
@@ -112,13 +112,12 @@ class CoronaVirusData:
             return f"No se encontro el pais {country_name}. Los nombres de paises deben estar en ingles."
         
 
-class ShizuCoronaVirus():
+class ShizuCoronaVirus:
 
     def __init__(self, shizu):
         self.coronavirusdata = CoronaVirusData()
         self.shizu_document = ShizuDocument()
         self.shizu = shizu
-
 
     @commands("cvid")
     async def coronavirus(self, message):
@@ -175,7 +174,6 @@ class ShizuCoronaVirus():
             if not founded:
                 return await message.channel.send("Error, estas intentando deshabilitar algo que NO existe en la DB!")
 
-
             # Procedo a quitar la task de la base de datos...
             # Por logica la task actual es la ultima en la lista de task ya que arriba fue agregada al container
             # al ejecutar create_task_document
@@ -203,13 +201,12 @@ class ShizuCoronaVirus():
         country = message.content.upper()
         resp = self.coronavirusdata.get_country_data(country)
         try:
-            #await message.delete(delay=5)
+            # await message.delete(delay=5)
             pass
         except Exception:
             pass
         await message.channel.send(resp)
-        
-    
+
     @commands()
     async def cvidcheckupd(self, message):
         """
@@ -219,7 +216,7 @@ class ShizuCoronaVirus():
             A este comando lo llama la base de datos.
         """
         cvid_doc = self.shizu.database.get_document("tasks", {"_id" : "coronavirus"})
-        if cvid_doc != None:
+        if cvid_doc is not None:
             response = self.coronavirusdata.cvidupdate()
             if response:
                 for task in cvid_doc["tasks_list"]:
@@ -227,7 +224,6 @@ class ShizuCoronaVirus():
                     # actualizo el tiempo de las task interiores.. nose para que, en realtime_task no es necesario.. pero bueno
                     task["created_time"] = datetime.now() 
                     await message.channel.send(response)
-
 
     @commands()
     async def cvidinfo(self, message):
@@ -245,9 +241,3 @@ class ShizuCoronaVirus():
         
         discord_message = f"Datos globales: Infectados: {cases}, muertes: {recoveries}, recuperados: {deaths}."
         await message.channel.send(discord_message)
-
-
-
-
-
-CoronaVirusData().cvidupdate()

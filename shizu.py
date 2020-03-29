@@ -185,5 +185,5 @@ class Shizu(discord.Client):
 while True:
     print("iniciando shizu")
     shizu = Shizu()
-    shizu.run(bot_vars.TOKEN)
+    shizu.run(bot_vars.CHIZU_TOKEN)
     time.sleep(5000)

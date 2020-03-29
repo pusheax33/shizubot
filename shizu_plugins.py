@@ -4,8 +4,10 @@ from shizu_music import ShizuMusic
 from shizu_admin import ShizuAdmin
 from shizu_media import ShizuMedia
 from shizu_youtube import ShizuYoutube
-from shizu_images import ShizuImages
+from shizu_images import ShizuImage
 from shizu_coronavirus import ShizuCoronaVirus
+from shizu_images import ShizuImage
+
 
 class ShizuPlugin:
     """
@@ -17,7 +19,15 @@ class ShizuPlugin:
     plugin_list = []
 
     def __init__(self, shizu):
-        self.plugin_list = [ShizuCommands(shizu), ShizuMusic(shizu), ShizuAdmin(), ShizuMedia(shizu), ShizuYoutube(shizu), ShizuImages(), ShizuCoronaVirus(shizu)]
+        self.plugin_list = [
+            ShizuCommands(shizu),
+            ShizuMusic(shizu),
+            ShizuAdmin(),
+            ShizuMedia(shizu),
+            ShizuYoutube(shizu),
+            ShizuCoronaVirus(shizu),
+            ShizuImage()
+        ]
 
     def add_plugin(self, obj):
         if inspect.isclass(obj):
