@@ -18,7 +18,7 @@ class CoronaVirusData:
         except Exception:
             return
         # print(resp.text)
-        regx_country = r'class=\"s0\">\d{0,10}((?:</td><td class=\"s0\">)|(?:</td><td class=\"s0 softmerge\"><div class=\"softmerge-inner\" style=\"width: 97px; left: -1px;\">))(.*?)(?:(?:</div>)|(?:</td><td class=\"s1\"))'
+        regx_country = r'class=\"s0\">\d{0,10}((?:</td><td class=\"s0\">)|(?:</td><td class=\"s0 softmerge\"><div class=\"softmerge-inner\" style=\"width: \d+px; left: -1px;\">))(.*?)(?:(?:</div>)|(?:</td><td class=\"s1\"))'
         regx_data = r'class=\"s1\">([\d]*)</td>'
         matches = re.finditer(regx_data, resp.text, re.MULTILINE)
         matches_country = re.finditer(regx_country, resp.text, re.MULTILINE)
@@ -52,11 +52,6 @@ class CoronaVirusData:
 
         discord_response = ""
         for country_name in actual_datalist:
-            if len(actual_datalist) != len(self.previous_datalist):
-                discord_response = "El data set anterior es distinto al dataset actual :o, no se pudo comparar paises. Data set anterior actualizado al actual."
-                print(len(actual_datalist), actual_datalist)
-                print(len(self.previous_datalist), self.previous_datalist)
-                break
             
             try:
                 actual_cases = int(actual_datalist[country_name][0])
@@ -99,8 +94,8 @@ class CoronaVirusData:
                 # Significa que hay data nueva para actualizar, entonces agrego el pais
                 discord_response += "**"+country_name.upper() + f"** ---> {partial_response}. Total -> {actual_cases} casos, {actual_deaths} muertes, {actual_recoveries} recuperados.\n\n"
 
-        for key in actual_datalist:
-            self.previous_datalist[key] = actual_datalist[key]
+            self.previous_datalist[country_name] = actual_datalist[country_name]
+
         print("RESPONSE: " + discord_response)
         return discord_response
 

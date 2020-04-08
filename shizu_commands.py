@@ -1,6 +1,5 @@
 ﻿from decorators import commands
 import random
-from google_images_download.google_images_download import googleimagesdownload
 from core import GetSavedEmojis
 from shizu_tasks import *
 from shizu_database import ShizuDatabase
@@ -13,7 +12,6 @@ ip = requests.get('https://checkip.amazonaws.com').text.strip()
 class ShizuCommands:
     
     def __init__(self, shizu):
-        self.image_downloader = googleimagesdownload()
         self.shizu = shizu
         self.shizu_tasks = shizu.shizu_tasks
         self.database = ShizuDatabase()

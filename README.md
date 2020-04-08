@@ -17,7 +17,7 @@
              
 A personal discord bot
 
-Dependencias:
+Dependences:
 - [youtube-dl](https://github.com/ytdl-org/youtube-dl)
 - [requests](https://github.com/psf/requests)
 - [mongodb](https://www.mongodb.com/es)

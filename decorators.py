@@ -1,15 +1,19 @@
 from functools import wraps
 import bot_vars
-import asyncio
 import inspect
+import os
+from commandlist import CommandList
 
 
 def commands(prefix=None, additional_prefix=None):
 
     def decor(func):
+        # Agrego metodo/funcion a la lista de metodos
+        # CommandList.add_command(func)
+
         func_name = func.__name__
         print("Fun NAME: " + func_name)
-        command_prefix = bot_vars.COMMAND_PREFIX  # prefix del bot. Por defecto -> ;
+        command_prefix = bot_vars.COMMAND_PREFIX
         command_name_list = [command_prefix + (prefix or func_name), command_prefix + (additional_prefix or func_name)]
 
         @wraps(func)
@@ -18,10 +22,6 @@ def commands(prefix=None, additional_prefix=None):
                 Haciendo test esta es la forma mas rapida de matchear que encontre. re.compile/match y
                 startswith demoran mucho mas que esto.
             """
-                
-            if (message.content == "None"):
-                await func(self, message)
-
             current_command = message.content.split(maxsplit=1)[0]
 
             # El comando recibido corresponde con los comandos de la funcion actual (func) ?
@@ -39,14 +39,44 @@ def commands(prefix=None, additional_prefix=None):
 
         return wrapper
     return decor
-"""
-def ignorecalls(func):
-    # Decorador que solo aceptara calls de funciones de la misma clase o de la clase especificada como excepcion
 
-    def inner(exception=None, *args):
-        if __name__ == "__main__":
-            # Es decir, si 
-            pass
 
-"""
+def avoid_external_calls(func):
 
+    async def async_wrapper(*args):
+        # Obtengo el nombre del archivo del metodo que esta llamando
+        caller_frame = inspect.stack()[1]
+        caller_filename = caller_frame.filename
+        caller_filename = os.path.splitext(os.path.basename(caller_filename))[0]
+
+        # Obtengo el nombre del archivo del metodo que se llama
+        called_filename = func.__module__
+
+        if called_filename == caller_filename:
+            if inspect.iscoroutinefunction(func):
+                return await func(*args)
+            else:
+                return func(*args)
+        else:
+            print("Ignorando llamada externa")
+            return False
+
+    def wrapper(*args):
+        # Obtengo el nombre del archivo del metodo que esta llamando
+        caller_frame = inspect.stack()[1]
+        caller_filename = caller_frame.filename
+        caller_filename = os.path.splitext(os.path.basename(caller_filename))[0]
+
+        # Obtengo el nombre del archivo del metodo que se llama
+        called_filename = func.__module__
+
+        if called_filename == caller_filename:
+            return func(*args)
+        else:
+            print("Ignorando llamada externa")
+            return False
+
+    if inspect.iscoroutinefunction(func):
+        return async_wrapper
+    else:
+        return wrapper

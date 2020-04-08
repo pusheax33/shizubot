@@ -9,6 +9,7 @@ from shizu_tasks import ShizuTasks
 from shizu_database import ShizuDatabase
 from datetime import datetime
 from core import debug_log
+from commandlist import CommandList
 
 
 class Shizu(discord.Client):
@@ -24,7 +25,7 @@ class Shizu(discord.Client):
         loop.create_task(self.run_check_tasks())
 
     async def run_check_tasks(self):
-        while(True):
+        while True:
             await self.shizu_tasks.check_tasks()
             debug_log("durmiendo 10 segundos antes de ejecutar siguiente check de tasks...", "shizu")
             await asyncio.sleep(10)
@@ -38,8 +39,8 @@ class Shizu(discord.Client):
         await self.change_presence(activity=game)
 
         print(datetime.now().minute.__str__() + ":" + datetime.now().second.__str__())
-        ######################## DATABASE ########################
 
+        ########################## DATABASE ##########################
         # No se si esta forma de updatear es lenta o rapida, pero por ahora se utilizara asi.
         # Basicamente dejo que mongo verifique si el id existe, si no existe agrega la coleccion
         await self.run_pending_tasks()
@@ -51,9 +52,8 @@ class Shizu(discord.Client):
                 #print("miembro %s guardado" % member.name)
                 member_doc = self.shizu_document.create_user_document(member)
                 self.database.save_member(member_doc)
-
-
         ######################## FIN DATABASE ########################
+
         print(datetime.now().minute.__str__() + ":" + datetime.now().second.__str__())
 
         print(
@@ -98,8 +98,11 @@ class Shizu(discord.Client):
             for name, method in inspect.getmembers(plugin, predicate=inspect.ismethod):
                 if name == "__init__":
                     continue
-                
-                call = await method(message)
+
+                if inspect.iscoroutinefunction(method):
+                    call = await method(message)
+                else:
+                    call = method(message)
 
                 if call is not False:
                     print("llamando a %s" % method)

@@ -2,16 +2,13 @@ from PIL import Image, UnidentifiedImageError
 from core import GetSavedEmojis, get_saved_images
 from decorators import *
 import random
-import asyncio
 from discord import File
-from core import debug_log
 from shizu_database import ShizuDatabase
-from shizu_tasks import ShizuTasks
+
 
 class ShizuMedia():
 
     def __init__(self, shizu):
-        self.database = ShizuDatabase()
         self.shizu = shizu
         self.shizu_tasks = shizu.shizu_tasks
 
@@ -48,9 +45,8 @@ class ShizuMedia():
     @commands()
     async def randomimage(self, message):
         images = get_saved_images()
-        path=random.choice(images)
+        path = random.choice(images)
         await message.channel.send(file=File(path))
-
 
     @commands()
     async def looprandomimage(self, message):
@@ -81,10 +77,4 @@ class ShizuMedia():
         self.shizu_tasks.start_task(task_doc)
         reply = f"Ok, cada {minutes_until_execute} minutos colocare una imagen random robada de algun server" + (f" con un total de {loop_times} veces." if loop_times else ".")
         await message.channel.send(reply)
-
-# ejecuto un comando de loop, por ejemplo ;loopemojicollage o ;emojicollage loop xveces
-# Agrego en la base de datos que en la guild x, canal x, el usuario x agrego como tarea ;loopemojicollage
-# Ejecuto la funcion create_task en donde le paso el diccionario de la task que acabo de crear en la base de datos
-# Cada x tiempo el check task se ejecuta y ejecutara el comando en caso de ser el tiempo
-# si lo ejecuta se debe restar looptimes en caso de que no sea infinito y actualizar el tiempo
 

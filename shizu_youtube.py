@@ -1,45 +1,54 @@
 from decorators import commands
 import asyncio
-import discord
 import youtube_dl
 import random
 import os
 import shutil
-import glob
-from urllib.error import HTTPError
 import requests
 
 ip = requests.get('https://checkip.amazonaws.com').text.strip()
 
-# Suppress noise about console usage from errors
-youtube_dl.utils.bug_reports_message = lambda: ''
-
-
-ytdl_format_options = {
-    'format': 'bestaudio/best',
-    'outtmpl': '%(extractor)s-%(id)s-%(title)s.%(ext)s',
-    'restrictfilenames': True,
-    'noplaylist': True,
-    'nocheckcertificate': True,
-    'ignoreerrors': False,
-    'logtostderr': False,
-    'quiet': True,
-    'no_warnings': True,
-    'default_search': 'auto',
-    'source_address': '0.0.0.0' # bind to ipv4 since ipv6 addresses cause issues sometimes
-}
-beforeArgs = "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5"
-ffmpeg_options = {
-    'options': '-vn'
-}
-
-ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
-ytdl.beforeArgs = beforeArgs
 
 class YoutubeDownloadHelper:
 
-    def my_hook(self, d):
-        print("TEST")
+    async def search(self, search_string, download=False):
+        hexdigits = "0123456789abcdef"
+        random_digits = "".join([ hexdigits[random.randint(0,0xF)] for _ in range(16) ])
+        directory_name = "voice/"
+
+        ytdl_format_options = {
+            'format': 'bestaudio/best',
+            'outtmpl': directory_name + random_digits + "%(title)s.%(ext)s",
+            'restrictfilenames': True,
+            'noplaylist': True,
+            'nocheckcertificate': True,
+            'ignoreerrors': False,
+            'logtostderr': False,
+            'quiet': True,
+            'no_warnings': True,
+            'force-ipv4': True,
+            'default_search': 'auto',
+            'source_address': '0.0.0.0',
+        }
+        before_args = "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5 "
+        ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
+        ytdl.beforeArgs = before_args
+
+        loop = asyncio.get_event_loop()
+        data = await loop.run_in_executor(None, lambda: ytdl.extract_info(search_string, download=download))
+        if 'entries' not in data:
+            return
+
+        data = data['entries'][0]
+        # print(data)
+        filepath = "" if not download else ytdl.prepare_filename(data)
+
+        return_data = {
+            "filepath" : filepath, "url": "http://www.youtube.com/watch?v="+data["id"], "title": data["title"],
+            "duration" : data["duration"], "view_count" : data["view_count"]
+        }
+        print(return_data)
+        return return_data
 
     @classmethod
     async def download(self, url, filetype="video", download_playlist=False, extension="mkv", force_download=False):
@@ -75,28 +84,7 @@ class YoutubeDownloadHelper:
         ytdl.beforeArgs = beforeArgs
         
         loop = asyncio.get_event_loop()
-        """data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=False))
-        print("download youtube DATA: ", data)
 
-        # Si force_download = True significa que esta funcion retornara informacion para que el bot
-        # en discord, en caso de haber algo raro (como un video de 10 horas), responda en discord
-        # pidiendo permisos para descargar videos grandes o playlistgrandes o algo raro (para evitar trolls.)
-        if force_download:
-            if 'entries' in data and download_playlist: # redundante pero significa que es playlist
-                entries = data['entries']
-                for data in entries:
-                    duration = int(data['duration'])
-                    if duration >= 3600:
-                        print("DURATION DEL VID MAYOR A 1 HORA")
-                        #return {"status" : "paused", "duration", duration}
-
-            elif not download_playlist: # Link video directo sin playlist
-                duration = int(data['duration'])
-                if duration >= 3600:
-                    # Devuelvo la duracion para que shizu me pregunte si debo descargar un video asi o me estan troleando
-                    print("DURATION DEL VID MAYOR A 1 HORA")
-                    #return {"status" : "paused", "duration", duration}
-"""
         data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=True))
         return {"status": "OK", "path": directory_name}
 
@@ -167,33 +155,4 @@ class ShizuYoutube:
 
         free_mem = str(round((shutil.disk_usage("/")[2]/1024)/1024))
         await message.channel.send("Listo <3. Memoria Libre: " + free_mem + " MB")
-
-"""        success = False
-        def check(m):
-            success = False
-            if m.content[0] == "s":
-                files = glob.glob('youtube/video')
-                for f in files:
-                    os.remove(f)
-
-                files = glob.glob('youtube/audio')
-                for x in files:
-                    os.remove(x)
-                success = True
-
-            return success
-
-        await message.channel.send("⚠️ Se van a eliminar todos los videos y audios subidos, continuar? (responder 's' para si 'n' para cancelar) ⚠️", delete_after=30)
-        try:
-            success = await self.shizu.wait_for('message', check=check, timeout=30)
-            print("ASDADASDSA")
-        except asyncio.TimeoutError:
-            return await message.channel.send("⚠️⚠️⚠️ Tiempo de espera agotado, perro. Cancelado. ⚠️⚠️⚠️")
-        else:
-            print(":o")
-        if success:
-            free_mem = str(round((shutil.disk_usage("/")[2]/1024)/1024))
-            await message.channel.send("Listo <3. Memoria Libre: " + free_mem + " MB")
-        else:
-            await message.channel.send("Ok, no hago nada... Memoria Libre: " + free_mem + " MB")"""
 

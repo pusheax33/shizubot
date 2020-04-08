@@ -1,8 +1,11 @@
 .gitignore
 .vscode
+.idea
 __pycache__
+venv
 bot_vars.py
 test.py
+voice/*
 guilds
 images
 music/*
