@@ -3,6 +3,7 @@
 .idea
 __pycache__
 venv
+codetest
 bot_vars.py
 test.py
 voice/*
