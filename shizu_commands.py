@@ -5,6 +5,7 @@ from shizu_tasks import *
 from shizu_database import ShizuDatabase
 from discord import File
 import requests
+from bot_vars import SHIZUWEB
 
 ip = requests.get('https://checkip.amazonaws.com').text.strip()
 
@@ -73,7 +74,8 @@ class ShizuCommands:
             
     @commands()
     async def web(self, message):
-        await message.channel.send("http://"+ip+"/")
+        msg = "WEB en proceso: http://"+SHIZUWEB+"/ \nWEB vieja: http://"+ip+"/"
+        await message.channel.send(msg)
 
     @commands()
     async def exp(self, message):

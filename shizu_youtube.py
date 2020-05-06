@@ -95,7 +95,7 @@ class ShizuYoutube:
         self.shizu = shizu
 
     @commands('ytd')
-    async def ytdownload(self, message):
+    async def dw(self, message):
         result = {"status" : ""}
         url = ""
         filetype = ""
@@ -137,7 +137,6 @@ class ShizuYoutube:
                     print(e.__class__.__name__)
                     await message.channel.send("Ocurrio un error desconocido!! Abortando para evitar ban ip..")
                     return
-
 
         if result["status"] == "OK":
             await message.channel.send("Completado!! Link de archivos: http://"+ip+"/shizu/" + result["path"])

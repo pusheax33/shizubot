@@ -9,7 +9,7 @@ from shizu_tasks import ShizuTasks
 from shizu_database import ShizuDatabase
 from datetime import datetime
 from core import debug_log
-from commandlist import CommandList
+import traceback
 
 
 class Shizu(discord.Client):
@@ -187,6 +187,16 @@ class Shizu(discord.Client):
 
 while True:
     print("iniciando shizu")
-    shizu = Shizu()
-    shizu.run(bot_vars.CHIZU_TOKEN)
-    time.sleep(5000)
+    try:
+        shizu = Shizu()
+        shizu.run(bot_vars.TOKEN)
+        time.sleep(5000)
+    except:
+        traceback.print_exc()
+        with open('log.txt', 'a+') as logger:
+            now = datetime.now()
+            time = "[%d:%d:%d] " % (now.hour, now.minute, now.second)
+            logger.write(time)
+            logger.write(traceback.format_exc())
+            logger.write("\n\n")
+            time.sleep(5000)

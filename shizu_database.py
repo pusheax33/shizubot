@@ -64,7 +64,6 @@ class ShizuDatabase():
         except Exception:
             traceback.print_exc()
 
-
     def remove_document(self, collection_name, document):
         # Verificar si existe el doc, si existe lo elimino y retorno True, sino retorno false.
         if self.document_exists(collection_name, document):
@@ -93,7 +92,6 @@ class ShizuDatabase():
     def document_exists(self, collection_name, document):
         return self.get_document(collection_name, {"_id": document["_id"]}) != None
 
-
     def save_task(self, task_doc):
         """
             Si la task existe reemplaza la task en la base de datos con el parametro task_doc
@@ -103,7 +101,6 @@ class ShizuDatabase():
 
         return task_id
 
-
     def update_task(self, update_task_doc):
         if update_task_doc:
             task_modified = self.update_document("tasks", update_task_doc)
@@ -112,7 +109,6 @@ class ShizuDatabase():
             debug_log("Error: El diccionario recibido es None.")
 
         return task_modified
-
 
     def save_guild(self, guild_doc):
         # Agrega la guild solo si no existe en DB
@@ -138,7 +134,6 @@ class ShizuDatabase():
         debug_log("El usuario {0} ya existe en la DB, ignorando!...".format(member_doc["name"]))
         return None
 
-
     def add_experience(self, member, exp_to_add):
         # Retorna True si subio de nivel
         # Este metodo no tiene que estar aca
@@ -149,6 +144,7 @@ class ShizuDatabase():
         debug_log(f"Agregando {exp_to_add} de experiencia", "db")
         current_lvl = db_member["level"]
 
+        print("EXP PARA PROX LVL:", self.get_lvl_experience(current_lvl))
         if new_exp >= self.get_lvl_experience(current_lvl):
             current_lvl += 1 # Subo de nivel!
             lvlup = True
@@ -158,6 +154,7 @@ class ShizuDatabase():
         db_member["message_count"] += 1 
         self.update_document("members", db_member)
 
+        print("LEVEL UP??? ", lvlup)
         return lvlup
 
     def get_lvl_experience(self, lvl):
