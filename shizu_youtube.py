@@ -11,6 +11,7 @@ ip = requests.get('https://checkip.amazonaws.com').text.strip()
 
 class YoutubeDownloadHelper:
 
+    @classmethod
     async def search(self, search_string, download=False):
         hexdigits = "0123456789abcdef"
         random_digits = "".join([ hexdigits[random.randint(0,0xF)] for _ in range(16) ])
@@ -93,6 +94,14 @@ class ShizuYoutube:
 
     def __init__(self, shizu):
         self.shizu = shizu
+
+    @commands('yt')
+    async def youtube(self, message):
+
+        url = message.content
+        youtube_url = await YoutubeDownloadHelper.search(search_string=url)
+
+        await message.channel.send(youtube_url["url"])
 
     @commands('ytd')
     async def dw(self, message):

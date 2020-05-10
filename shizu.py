@@ -113,9 +113,6 @@ class Shizu(discord.Client):
             break
 
     async def give_experience(self, message):
-        # TODO: Checkear si el comando de experiencia esta habilitado en el server antes de responder
-        #     : Verificar que el usuario no spamee mensajes y suba de nivel, es decir, agregar un delay entre exp y exp por user
-        #     - No agregar Exp cuando se usa comandos del bot
         if message.author.bot and message.author.id != bot_vars.BOT_ID: return
 
         doc = {"_id" : message.author.id}
@@ -130,18 +127,10 @@ class Shizu(discord.Client):
 
         if should_add_exp:
             member_message_count = db_member["message_count"]
-            # TODO: LA EXP ESTA ROTA POR ALGUN MOTIVO, EL LAST_MESSAGE_TIME SE ACTUALIZA EN LA DB PERO NO INCREMENTA LA EXP
-            
+
             debug_log(f"Total mensajes: {member_message_count})", "shizu")
             experience_to_add = len(message.content) * 0.2 + member_message_count * 0.4 + 60
             lvlup = self.database.add_experience(message.author, experience_to_add)
-
-            # Guardo el tiempo del mensaje del usuario en la DB
-            if db_member:
-                db_member["last_message_time"] = datetime.now()
-                saved = self.database.update_document("members", db_member)
-                if not saved:
-                    print("save_message_to_db: ERROR al guardar el tiempo actual en un usuario")
 
             if lvlup:
                 new_lvl = db_member["level"] + 1 # Al level "viejo" (de la query antes de subir de lvl) le sumo uno para evitar hacer dos querys

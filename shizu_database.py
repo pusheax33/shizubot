@@ -60,6 +60,7 @@ class ShizuDatabase():
         """
         try:
             doc_modified = self.database[collection_name].update_one({"_id" : document["_id"]}, {"$set": document})
+
             return doc_modified.modified_count > 0
         except Exception:
             traceback.print_exc()
@@ -151,7 +152,8 @@ class ShizuDatabase():
 
         db_member["experience"] = new_exp
         db_member["level"] = current_lvl
-        db_member["message_count"] += 1 
+        db_member["last_message_time"] = datetime.now()
+        db_member["message_count"] += 1
         self.update_document("members", db_member)
 
         print("LEVEL UP??? ", lvlup)
