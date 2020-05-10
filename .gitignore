@@ -1,6 +1,7 @@
 .gitignore
 .vscode
 .idea
+shizubot.zip
 __pycache__
 venv
 codetest
