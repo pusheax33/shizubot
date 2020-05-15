@@ -21,7 +21,7 @@ class ShizuPlugin:
         self.plugin_list = [
             ShizuCommands(shizu),
             ShizuMusic(shizu),
-            ShizuAdmin(),
+            ShizuAdmin(shizu),
             ShizuMedia(shizu),
             ShizuYoutube(shizu),
             ShizuCoronaVirus(shizu),

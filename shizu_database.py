@@ -66,7 +66,7 @@ class ShizuDatabase():
             traceback.print_exc()
 
     def remove_document(self, collection_name, document):
-        # Verificar si existe el doc, si existe lo elimino y retorno True, sino retorno false.
+        # Verifica si existe el doc, si existe lo elimina y retorna True, sino retorna false.
         if self.document_exists(collection_name, document):
             try:
                 return self.database[collection_name].delete_one(document).deleted_count > 0

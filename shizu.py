@@ -16,6 +16,7 @@ class Shizu(discord.Client):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.file = __file__
         self.shizu_tasks = ShizuTasks(self)
         self.database = ShizuDatabase()
         self.shizu_document = ShizuDocument()
@@ -154,19 +155,25 @@ class Shizu(discord.Client):
             self.shizu_tasks.start_task(task_container)
 
     async def save_message_to_db(self, message):
-        # Guardo cada mensaje a la db de la guild, con un total de 50 messages por canal
+        # Guardo cada mensaje a la db de la guild, con un total de 250 messages por canal
         guild_document = self.database.get_document("guilds", {"_id" : message.guild.id})
         if not guild_document:
             raise Exception
         channels = guild_document["channels"]
         
         last_messages = []
+        channel_found = False
         for chan in channels:
             if chan["id"] == message.channel.id:
                 last_messages = chan["last_50_messages"]
+                channel_found = True
                 break
+        if not channel_found:
+            # Canal no existe, lo agrego y updateo db. hardcodeado bien rico.
+            guild_document["channels"].append({"id" : message.channel.id, "last_50_messages" : [], "tasks" : []})
+            print("CANAL no existia, agregandolo a la DB.")
 
-        if len(last_messages) >= 50:
+        if len(last_messages) >= 250:
             del last_messages[0]
         last_messages.append(message.id)
         self.database.update_document("guilds", guild_document)
