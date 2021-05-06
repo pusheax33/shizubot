@@ -42,7 +42,6 @@ class Shizu(discord.Client):
         print(datetime.now().minute.__str__() + ":" + datetime.now().second.__str__())
 
         ########################## DATABASE ##########################
-        # No se si esta forma de updatear es lenta o rapida, pero por ahora se utilizara asi.
         # Basicamente dejo que mongo verifique si el id existe, si no existe agrega la coleccion
         await self.run_pending_tasks()
         for guild in self.guilds:
@@ -82,7 +81,6 @@ class Shizu(discord.Client):
         await self.save_message_to_db(message)
         
         if message.author == self.user:
-            #return
             pass
 
         msg = message.content

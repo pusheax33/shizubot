@@ -51,7 +51,7 @@ class ShizuCommands:
             raise Exception
         
         minutes_until_execute = int(splitted[0])
-        loop_times = 0 # infinitas veces por defecto se ejecutara el loop
+        loop_times = 0
 
         if len(splitted) > 1:
             loop_times = int(splitted[1])
@@ -63,7 +63,7 @@ class ShizuCommands:
         database_task_id = self.shizu.database.save_task(task_doc)
         if not database_task_id:
             await message.channel.send("Hubo un error al guardar la tarea en la base de datos, abortando.")
-            return print("TAIHEN!!, ERROR AL GUARDAR LA TASK EN LA BASE DE DATOS!!")
+            return print("ERROR AL GUARDAR LA TASK EN LA BASE DE DATOS!!")
 
         # creo la task para que comience a ejecutarse
         self.shizu.shizu_tasks.start_task(task_doc)
@@ -87,29 +87,12 @@ class ShizuCommands:
         level = self.database.get_document("members", doc)["level"]
         current_lvl_exp = round(self.database.get_lvl_experience(level))
         next_lvl_exp = round(self.database.get_lvl_experience(level + 1))
-        lvl_exp = abs(next_lvl_exp - current_lvl_exp) # exp total para el siguiente nivel, ej: 40000
+        lvl_exp = abs(next_lvl_exp - current_lvl_exp) 
 
         # experiencia obtenida en el nivel actual, ej: lvl 15 con 12321/40000 de exp para nivel 16
         actual_lvl_exp = abs( (current_exp - current_lvl_exp) + lvl_exp)
 
         await message.channel.send(f"Level {level}. Experiencia {actual_lvl_exp}/{lvl_exp}.")
-
-    @commands()
-    async def perfil(self, message):
-        await message.channel.send("Comando incompleto >.<")
-
-    @commands()
-    async def shop(self, message):
-        await message.channel.send("Comando incompleto >.<")
-
-    @commands()
-    async def shizy(self, message):
-        shizy = self.database.get_document("members", message.author.id)["shizy"]
-        await message.channel.send("Tenes un total de %d Shizys. ;shop para gastarlos" % shizy)
-
-    @commands()
-    async def stoptask(self, message):
-        task_name = message.content
 
     @commands()
     async def birthday(self, message):
@@ -121,9 +104,8 @@ class ShizuCommands:
         if len(words) > 1:
             await message.channel.send(random.choice(words))
         else:
-            await message.channel.send("Formato invalido ._. ==> escribe: ;choose opcion1, opcion2, etc")
+            await message.channel.send("Formato invalido ==> escribe: ;choose opcion1, opcion2, etc")
 
     @commands()
     async def remind(self, message):
-        # Formato del comando: ;remind 1 day/month/year text here(si debe recordar en canal actual)
         command = message.content

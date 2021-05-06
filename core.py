@@ -4,13 +4,6 @@ import os
 from discord import Message
 
 def debug_log(text, message_type=None):
-    # Cada mensaje enviado a debug_log se le puede agregar un parametro extra que es el tipo de mensaje
-    # Por ejemplo si uso debug_log para un mensaje de database le agrego de message_type "db"
-    # Esta funcion verifica si:
-    #   a) Esta activado el debug?
-    #   b) En bot_vars.DEBUG_MESSAGE_FILTER esta seleccionado que se muestren todos los mensajes (All) o solamente el de un tipo en especifico?
-    #   c) Si esta seleccionado un tipo en especifico, por ejemplo "db" y el message_type de esta funcion tambien es "db", entonces muestra el mensaje
-    # TODO: Agregar multiples tipos de mensajes
     if DEBUG and (DEBUG_MESSAGE_FILTER == "ALL" or DEBUG_MESSAGE_FILTER == message_type):
         now = datetime.now()
         time = "[%d:%d:%d] " % (now.hour, now.minute, now.second)

@@ -8,8 +8,6 @@ from commandlist import CommandList
 def commands(prefix=None, additional_prefix=None):
 
     def decor(func):
-        # Agrego metodo/funcion a la lista de metodos
-        # CommandList.add_command(func)
 
         func_name = func.__name__
         print("Fun NAME: " + func_name)
@@ -18,10 +16,6 @@ def commands(prefix=None, additional_prefix=None):
 
         @wraps(func)
         async def wrapper(self, message, *args):
-            """
-                Haciendo test esta es la forma mas rapida de matchear que encontre. re.compile/match y
-                startswith demoran mucho mas que esto.
-            """
             current_command = message.content.split(maxsplit=1)[0]
 
             # El comando recibido corresponde con los comandos de la funcion actual (func) ?

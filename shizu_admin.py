@@ -48,13 +48,10 @@ class ShizuAdmin:
                     # el mensaje no existe pero esta en la db, lo agrego para eliminarlo de la db. 
                     no_deleted_msgs.append(msg_id)
             else:
-                # Agrego a la lista los mensajes no eliminados, esto para luego actualizarlo en el documento
-                # y poder ejecutar el metodo database.update_document sin cagarla.
                 no_deleted_msgs.append(msg_id)
 
         guild_info["channels"][guild_info["channels"].index(message_channel_info)]["last_50_messages"] = no_deleted_msgs
         print(guild_info["channels"][guild_info["channels"].index(message_channel_info)]["last_50_messages"])
-
 
         # no uso delete_messages porque solo elimina mensajes que son hasta 14 dias old
         try:
@@ -77,7 +74,7 @@ class ShizuAdmin:
             return await message.channel.send("Ocurrio un error (NotFound)")
 
         counter2 = len(messages)
-        await message.channel.send(f"Listo!! {counter2} mensajes eliminados.", delete_after=10)
+        await message.channel.send(f"Listo! {counter2} mensajes eliminados.", delete_after=10)
 
         # Elimino los mensajes eliminados de la base de datos
         self.shizu.database.update_document("guilds", guild_info)

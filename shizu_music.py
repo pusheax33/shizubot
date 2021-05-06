@@ -54,7 +54,7 @@ class ShizuMusic:
         # next_song = self.playlist.play_next(message.channel.id)
         message.content = COMMAND_PREFIX+"stop"
         await self.stop(message)
-        await message.channel.send("Skippeddd")
+        await message.channel.send("Skipped")
         message.content = COMMAND_PREFIX+"play"
         await self.play(message)
 

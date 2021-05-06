@@ -5,13 +5,6 @@ from datetime import datetime
 import traceback
 
 class ShizuDatabase():
-    """ 
-        La base de datos en mongodb esta formada por colecciones y documentos
-        Una coleccion posee uno o varios documentos dentros, por ejemplo coleccion guilds tendra todas las guilds en las que el bot esta, ej:
-            collection_guild : {guild_doc1, guild_doc2, ...}
-        Un documento es un json/dictionary donde se guarda todos los datos.
-    """
-
     database = None
     lvl_table = [100.0, 275.0, 800.0, 1825.0, 3500.0, 5975.0, 9400.0, 13925.0, 19700.0, 26875.0, 35600.0, 46025.0, 58300.0, 72575.0, 89000.0, 107725.0, 128900.0, 152675.0, 179200.0, 208625.0, 241100.0, 276775.0, 315800.0, 358325.0, 404500.0, 454475.0, 508400.0, 566425.0, 628700.0, 695375.0, 766600.0, 842525.0, 923300.0, 1009075.0, 1100000.0, 1196225.0, 1297900.0, 1405175.0, 1518200.0, 1637125.0, 1762100.0, 1893275.0, 2030800.0, 2174825.0, 2325500.0, 2482975.0, 2647400.0, 2818925.0, 2997700.0, 3183875.0, 3377600.0, 3579025.0, 3788300.0, 4005575.0, 4231000.0, 4464725.0, 4706900.0, 4957675.0, 5217200.0, 5485625.0, 5763100.0, 6049775.0, 6345800.0, 6651325.0, 6966500.0, 7291475.0, 7626400.0, 7971425.0, 8326700.0, 8692375.0, 9068600.0, 9455525.0, 9853300.0, 10262075.0, 10682000.0, 11113225.0, 11555900.0, 12010175.0, 12476200.0, 12954125.0, 13444100.0, 13946275.0, 14460800.0, 14987825.0, 15527500.0, 16079975.0, 16645400.0, 17223925.0, 17815700.0, 18420875.0, 19039600.0, 19672025.0, 20318300.0, 20978575.0, 21653000.0, 22341725.0, 23044900.0, 23762675.0, 24495200.0, 25242625.0, 26005100.0]
 
@@ -137,7 +130,6 @@ class ShizuDatabase():
 
     def add_experience(self, member, exp_to_add):
         # Retorna True si subio de nivel
-        # Este metodo no tiene que estar aca
         # Metodo que agrega experiencia al usuario y sube de nivel en caso de que cumpla con las condiciones para subir.
         lvlup = False
         db_member = self.get_document("members", {"_id" : member.id})
@@ -156,7 +148,6 @@ class ShizuDatabase():
         db_member["message_count"] += 1
         self.update_document("members", db_member)
 
-        print("LEVEL UP??? ", lvlup)
         return lvlup
 
     def get_lvl_experience(self, lvl):

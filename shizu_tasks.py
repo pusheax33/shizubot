@@ -16,7 +16,6 @@ class ShizuTasks():
         self.shizu = shizu
         self.shizu_database = ShizuDatabase()
         self.shizu_documents = ShizuDocument()
-        print("Fui instanciada!!!!!!!!!!!!!!!!!! eeeeewawawawawaa!!!")
 
     def create_task(self, task_name, message, minutes_until_execute, loop_times):
         # el tiempo en que se creo la task debe re setearse cada vez que se ejecuta la task

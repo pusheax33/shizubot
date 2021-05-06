@@ -17,7 +17,7 @@ class ImageSearch:
                     resp.raise_for_status()
                     return resp
                 except Exception:
-                    print("ERROR AL HACER REQUEST FETCH")
+                    print("ERROR AL FETCH")
                     return None
 
     async def fetch_json(self, url, params=None):
@@ -27,7 +27,7 @@ class ImageSearch:
                     resp.raise_for_status()
                     return await resp.json()
                 except Exception:
-                    print("ERROR AL HACER REQUEST FETCH")
+                    print("ERROR AL FETCH")
                     return None
 
     async def fetch_bytes(self, url, params=None):
@@ -42,7 +42,7 @@ class ImageSearch:
                     resp.raise_for_status()
                     return await resp.read()
                 except Exception:
-                    print("ERROR AL HACER REQUEST FETCH")
+                    print("ERROR AL FETCH")
                     return None
 
 
@@ -63,11 +63,11 @@ class ShizuImage:
 
         response = await self.image_search.fetch_json(BING_ENDPOINT + "/images/search", params)
         if not response:
-            return await message.channel.send("Hubo un error al obtener las imagenes D:")
+            return await message.channel.send("Hubo un error al obtener las imagenes!")
         thumbnail_urls = [img["contentUrl"] for img in response["value"]]
 
         if len(thumbnail_urls) == 0:
-            return await message.channel.send("No pude encontrar nada >.<")
+            return await message.channel.send("No pude encontrar nada!")
         else:
             choosed_image = random.choice(thumbnail_urls)
             await message.channel.send(choosed_image)
@@ -77,8 +77,3 @@ class ShizuImage:
         message.content = COMMAND_PREFIX+"img " + message.content
         await self.img(message, "AnimatedGif")
 
-
-"""import asyncio
-shizu_image = ShizuImage()
-loop = asyncio.get_event_loop()
-loop.run_until_complete(shizu_image.test())"""

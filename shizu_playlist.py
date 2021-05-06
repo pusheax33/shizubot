@@ -119,15 +119,6 @@ class ShizuPlaylist:
         pass
 
 
-
-
-"""
-shizu_playlist = ShizuPlaylist()
-playlist = shizu_playlist.create(1234)
-shizu_playlist.add(1234, "asd")
-"""
-
-
 class ShizuPlaylistException(Exception):
     def __init__(self, message):
         self.message = message
